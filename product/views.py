@@ -3,7 +3,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Category, Product, Review
-from .serializers import CategorySerializer, ProductSerializer, ReviewSerializer
+from .serializers import CategorySerializer, ProductSerializer, ReviewSerializer, ProductWithReviewsSerializer
+from django.db.models import Count
+
 @api_view(['GET'])
 def category_list(request):
     categories = Category.objects.all()
@@ -53,3 +55,9 @@ def review_detail(request, pk):
 
     serializer = ReviewSerializer(review)
     return Response(serializer.data)
+
+@api_view(['GET'])
+def products_with_reviews(request):
+    products = Product.objects.all()
+    serializer = ProductWithReviewsSerializer(products, many=True)
+    return Response(serializer.data) @api_view(['GET'])
