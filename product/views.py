@@ -1,9 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .models import Category, Product, Review
 from .serializers import CategorySerializer, ProductSerializer, ReviewSerializer
+from .permissions import IsModeratorPermission
 
 
 
@@ -41,14 +43,19 @@ class CategoryDetailView(APIView):
         return Response(status=204)
 
 
-
 class ProductListCreateView(APIView):
+    permission_classes = [IsAuthenticated, IsModeratorPermission]
+
     def get(self, request):
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
 
     def post(self, request):
+        for permission in self.permission_classes:
+            if not permission().has_permission(request, self):
+                return Response({"detail": "Permission denied."}, status=403)
+
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -57,13 +64,17 @@ class ProductListCreateView(APIView):
 
 
 class ProductDetailView(APIView):
+    permission_classes = [IsAuthenticated, IsModeratorPermission]
+
     def get(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
+        self.check_object_permissions(request, product)
         serializer = ProductSerializer(product)
         return Response(serializer.data)
 
     def put(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
+        self.check_object_permissions(request, product)
         serializer = ProductSerializer(product, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -72,9 +83,9 @@ class ProductDetailView(APIView):
 
     def delete(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
+        self.check_object_permissions(request, product)
         product.delete()
         return Response(status=204)
-
 
 class ReviewListCreateView(APIView):
     def get(self, request):
