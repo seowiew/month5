@@ -30,4 +30,4 @@ class Review(models.Model):
     stars = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)],
         default=5
-    )
+    ) 
