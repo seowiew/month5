@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'dj_rest_auth',
     'dj_rest_auth.registration',
+    'django_celery_beat'
 ]
 
 SITE_ID = 1
@@ -93,14 +94,20 @@ WSGI_APPLICATION = 'shop_api.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+#DATABASES = {
+    ##'ENGINE': 'django.db.backends.postgresql',
+        #'NAME': os.getenv('POSTGRES_DB'),
+        #'USER': os.getenv('POSTGRES_USER'),
+        #'PASSWORD': '111',
+        #'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+        #'PORT': os.getenv('POSTGRES_PORT', '5432'),
+    #}
+#}
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': '111',
-        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -122,6 +129,28 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/2"
+CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/2"
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'geeksstudy25@gmail.com'
+EMAIL_HOST_PASSWORD = 'hwkw bftk vmld dqfg' 
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER # app password
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
